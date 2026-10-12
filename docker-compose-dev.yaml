@@ -1,0 +1,59 @@
+x-templates:
+    template-service: &template-service
+        restart: unless-stopped
+        pull_policy: ${PULL_POLICY:-missing}
+        mem_limit: 200M
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "10m"
+                max-file: "3"
+
+services:
+
+    mosquitto:
+        <<: *template-service
+        container_name: jkbms-ha-mosquitto
+        image: docker.io/library/eclipse-mosquitto:2
+        user: root
+        entrypoint:
+            - /bin/sh
+            - -c
+            - |
+                rm -f /tmp/mosquitto-passwd
+                mosquitto_passwd -b -c /tmp/mosquitto-passwd \
+                    "$${MQTT_USER:-jkbms}" "$${MQTT_PASSWORD:-jkbms-dev}"
+                chown 1883:1883 /tmp/mosquitto-passwd
+                exec /docker-entrypoint.sh mosquitto -c /mosquitto/config/mosquitto.conf
+        environment:
+            - MQTT_PASSWORD=jkbms-dev
+            - MQTT_USER=jkbms
+        volumes:
+            - ./docker/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+        ports:
+            - "127.0.0.1:1884:1883"
+        healthcheck:
+            test:
+                - CMD-SHELL
+                - >-
+                  mosquitto_pub -h 127.0.0.1 -t healthcheck -m ok
+                  -u jkbms -P jkbms-dev -q 1 || exit 1
+            interval: 30s
+            timeout: 5s
+            retries: 3
+            start_period: 10s
+
+    home-assistant:
+        <<: *template-service
+        container_name: jkbms-ha
+        mem_limit: 1G
+        image: docker.io/madebytimo/home-assistant:latest
+        depends_on:
+            mosquitto:
+                condition: service_healthy
+        volumes:
+            - ./data-local:/media/home-assistant
+            - ./custom_components:/opt/home-assistant/custom_components:ro
+            - ./docker/configuration.yaml:/opt/home-assistant/template/configuration.yaml:ro
+        ports:
+            - "127.0.0.1:8124:8123"

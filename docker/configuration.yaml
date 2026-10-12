@@ -1,0 +1,7 @@
+# dev stack: minimal components
+http:
+websocket_api:
+api:
+frontend:
+logger:
+  default: info

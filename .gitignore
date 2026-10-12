@@ -1,0 +1,26 @@
+# folders
+__pycache__/
+.agent/
+.bsp/
+.idea/
+.svelte-kit/
+.metals/
+.temp*/
+.vscode/
+build/
+builds/
+data-local/
+data-ltt/
+node_modules/
+references/
+target/
+test-results/
+
+# files
+.DS_Store
+.env
+.iml
+package-lock.json
+
+# exclude
+!.vscode/launch.json

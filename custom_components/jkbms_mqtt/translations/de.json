@@ -1,0 +1,24 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "JK BMS (MQTT)",
+        "description": "Bridge-Topic-Präfix, z. B. \"{default_prefix}\". Ein Eintrag pro Präfix.",
+        "data": {
+          "prefix": "Topic-Präfix"
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "JK BMS (MQTT) Optionen",
+        "description": "Präfix ändern; lädt neu und abonniert. Standard: {default_prefix}.",
+        "data": {
+          "prefix": "Topic-Präfix"
+        }
+      }
+    }
+  }
+}
